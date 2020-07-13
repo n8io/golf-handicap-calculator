@@ -20,6 +20,7 @@ import { fetchCourseDetails, fetchCourses } from "../course";
 import { fetchGolfer } from "../golfer";
 import { teeToPar } from "../par";
 import { teesToTeeChoices } from "../tee";
+import { states } from "../states";
 
 inquirer.registerPrompt("autocomplete", autocomplete);
 
@@ -129,6 +130,13 @@ const selectHandicap = (golfer) => ({
   type: "number",
 });
 
+const selectState = {
+  message: "In what state did you play?",
+  name: "state",
+  source: search(states),
+  type: "autocomplete",
+};
+
 const ask = async () => {
   const { ghin: ghinNumber, lastName: familyName } = await inquirer.prompt([
     ghin,
@@ -136,12 +144,15 @@ const ask = async () => {
   ]);
 
   const golfer = await fetchGolfer(ghinNumber, familyName);
-  const { handicap } = await inquirer.prompt([selectHandicap(golfer)]);
+  const { handicap, state } = await inquirer.prompt([
+    selectHandicap(golfer),
+    selectState,
+  ]);
 
   // Set in case the handicap entered is different
   golfer.handicapIndex = handicap;
 
-  const courses = await fetchCourses();
+  const courses = await fetchCourses(state);
   const { courseId } = await inquirer.prompt([selectCourse(courses)]);
   const course = await fetchCourseDetails(courseId);
 
@@ -152,7 +163,7 @@ const ask = async () => {
     selectGrossScore,
   ]);
 
-  console.log({ holesPlayed, score, tee: tmpTee, whichNine });
+  // console.log({ holesPlayed, score, tee: tmpTee, whichNine });
 
   const tee = evolve({
     par: () => teeToPar(tmpTee),

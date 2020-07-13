@@ -56,11 +56,11 @@ const fetchCourse = async (name) => {
   return fetchCourseDetails(CourseID);
 };
 
-const fetchCourses = async () => {
+const fetchCourses = async (state) => {
   const pathname = `/api/v1/courses/search.json`;
   const uri = new URL(pathname, API_URL);
 
-  uri.searchParams.set("state", STATE);
+  uri.searchParams.set("state", state);
   uri.searchParams.set("country", COUNTRY);
 
   const { data } = await fetchWithAuth(uri);
